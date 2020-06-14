@@ -56,7 +56,8 @@ class MainActivity : AppCompatActivity() {
         start_sample_btn.setOnClickListener {
             Dexter.withContext(this)
                 .withPermissions(
-                    Manifest.permission.ACCESS_COARSE_LOCATION
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE
                 ).withListener(object : MultiplePermissionsListener {
                     override fun onPermissionsChecked(report: MultiplePermissionsReport) {
 
