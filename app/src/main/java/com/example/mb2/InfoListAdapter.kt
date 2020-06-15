@@ -27,6 +27,10 @@ class InfoListAdapter internal constructor(
         val altitude_ItemView: TextView = itemView.findViewById(R.id.altitude)
         val longitude_ItemView: TextView = itemView.findViewById(R.id.longitude)
         val type_ItemView: TextView = itemView.findViewById(R.id.type)
+        val lac_ItemView: TextView = itemView.findViewById(R.id.lac)
+        val tac_ItemView: TextView = itemView.findViewById(R.id.tac)
+        val mnc_ItemView: TextView = itemView.findViewById(R.id.mnc)
+        val mcc_ItemView: TextView = itemView.findViewById(R.id.mcc)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WordViewHolder {
@@ -38,7 +42,6 @@ class InfoListAdapter internal constructor(
     override fun onBindViewHolder(holder: WordViewHolder, position: Int) {
         val current = infos[position]
 
-
         holder.strengthItemView.text = "Strength: ${current.strength}"
         holder.gsm_rssi_ItemView.text = "GSM RSSI: ${current.gsm_rssi}"
         holder.umts_rscp_ItemView.text = "Umts Rscp: ${current.umts_rscp}"
@@ -49,6 +52,42 @@ class InfoListAdapter internal constructor(
         holder.altitude_ItemView.text = "Altitude: ${current.altitude}"
         holder.longitude_ItemView.text = "Longitude: ${current.longitude}"
         holder.type_ItemView.text = "Type: ${current.type}"
+        holder.lac_ItemView.text = "Lac: ${current.lac}"
+        holder.tac_ItemView.text = "Tac: ${current.tac}"
+        holder.mnc_ItemView.text = "Mnc: ${current.mnc}"
+        holder.mcc_ItemView.text = "Mcc: ${current.mcc}"
+
+        try {
+            val parent: ViewGroup = holder.gsm_rssi_ItemView.parent as ViewGroup
+
+            if (current.gsm_rssi == "")
+            {
+                parent.removeView(holder.gsm_rssi_ItemView)
+            }
+            if (current.umts_rscp == "")
+            {
+                parent.removeView(holder.umts_rscp_ItemView)
+            }
+            if (current.lte_rsrq == "")
+            {
+                parent.removeView(holder.lte_rsrq_ItemView)
+                parent.removeView(holder.lte_rsrp_ItemView)
+                parent.removeView(holder.lte_cqi_ItemView)
+                parent.removeView(holder.tac_ItemView)
+            }
+            if (current.lte_rsrq != "")
+            {
+                parent.removeView(holder.lac_ItemView)
+            }
+        }
+        catch (a: TypeCastException)
+        {
+
+        }
+
+
+
+
 
     }
 

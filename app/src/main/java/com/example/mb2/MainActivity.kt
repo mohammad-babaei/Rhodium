@@ -91,6 +91,11 @@ class MainActivity : AppCompatActivity() {
         var lte_rsrq: String = ""
         var lte_rsrp: String = ""
         var lte_cqi: String = ""
+        var mcc: String = ""
+        var mnc: String = ""
+        var lac: String = ""
+        var tac: String = ""
+
 
         var typee: String = ""
         val infos = tm.allCellInfo
@@ -101,12 +106,15 @@ class MainActivity : AppCompatActivity() {
         try {
             val cellInfo = tm.allCellInfo[0]
 
-
-
+            val networkOperator = tm.networkOperator
 
             if (cellInfo is CellInfoGsm)
             {
                 val cellSignalStrengthGsm: CellSignalStrengthGsm = cellInfo.cellSignalStrength
+                val cellIdentityGsm: CellIdentityGsm = cellInfo.cellIdentity
+                mcc = cellIdentityGsm.mcc.toString()
+                mnc = cellIdentityGsm.mnc.toString()
+                lac = cellIdentityGsm.lac.toString()
                 strength = cellSignalStrengthGsm.dbm.toString()
                 gsm_rssi = cellSignalStrengthGsm.asuLevel.toString()
                 typee = "GSM"
@@ -115,7 +123,11 @@ class MainActivity : AppCompatActivity() {
             if (cellInfo is CellInfoWcdma)
             {
                 val cellSignalStrengthWcdma: CellSignalStrengthWcdma = cellInfo.cellSignalStrength
+                val cellIdentityWcdma: CellIdentityWcdma = cellInfo.cellIdentity
                 strength = cellSignalStrengthWcdma.dbm.toString()
+                mcc = cellIdentityWcdma.mcc.toString()
+                mnc = cellIdentityWcdma.mnc.toString()
+                lac = cellIdentityWcdma.lac.toString()
                 umts_rscp = cellSignalStrengthWcdma.asuLevel.toString()
                 typee = "UMTS"
 
@@ -123,6 +135,10 @@ class MainActivity : AppCompatActivity() {
             if (cellInfo is CellInfoLte)
             {
                 val cellSignalStrengthLte: CellSignalStrengthLte = cellInfo.cellSignalStrength
+                val cellIdentityLte: CellIdentityLte = cellInfo.cellIdentity
+                mcc = cellIdentityLte.mcc.toString()
+                mnc = cellIdentityLte.mnc.toString()
+                tac = cellIdentityLte.tac.toString()
                 strength = cellSignalStrengthLte.dbm.toString()
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -150,7 +166,7 @@ class MainActivity : AppCompatActivity() {
             getLastLocation()
             if (current_location != null)
             {
-                val info = CellInfo(type = typee, gsm_rssi = gsm_rssi, umts_rscp = umts_rscp, lte_rsrq = lte_rsrq, lte_rsrp = lte_rsrp, lte_cqi = lte_cqi, strength = strength, longitude = current_location!!.longitude, altitude = current_location!!.latitude, time = System.currentTimeMillis())
+                val info = CellInfo(mcc = mcc, mnc = mnc, tac = tac, lac = lac, type = typee, gsm_rssi = gsm_rssi, umts_rscp = umts_rscp, lte_rsrq = lte_rsrq, lte_rsrp = lte_rsrp, lte_cqi = lte_cqi, strength = strength, longitude = current_location!!.longitude, altitude = current_location!!.latitude, time = System.currentTimeMillis())
                 val a = infoViewModel.insert(info)
 //                val mss = "$strength $typee \n latitude: ${current_location?.latitude.toString()}, longitude: ${current_location?.longitude.toString()}"
 //                Toast.makeText(this@MainActivity, mss, Toast.LENGTH_SHORT).show()

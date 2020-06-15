@@ -10,4 +10,8 @@
     <string name="time">Time:</string>
     <string name="altitude">Altitude:</string>
     <string name="longitude">Longitude:</string>
+    <string name="mnc">Mnc:</string>
+    <string name="mcc">Mcc:</string>
+    <string name="lac">Lac:</string>
+    <string name="tac">Tac:</string>
 </resources>
