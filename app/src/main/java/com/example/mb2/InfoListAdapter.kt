@@ -60,25 +60,26 @@ class InfoListAdapter internal constructor(
         try {
             val parent: ViewGroup = holder.gsm_rssi_ItemView.parent as ViewGroup
 
-            if (current.gsm_rssi == "")
+            if (current.type != "GSM")
             {
                 parent.removeView(holder.gsm_rssi_ItemView)
             }
-            if (current.umts_rscp == "")
-            {
-                parent.removeView(holder.umts_rscp_ItemView)
-            }
-            if (current.lte_rsrq == "")
+            if (current.type != "LTE")
             {
                 parent.removeView(holder.lte_rsrq_ItemView)
                 parent.removeView(holder.lte_rsrp_ItemView)
                 parent.removeView(holder.lte_cqi_ItemView)
                 parent.removeView(holder.tac_ItemView)
             }
-            if (current.lte_rsrq != "")
+            if (current.type == "LTE")
             {
                 parent.removeView(holder.lac_ItemView)
             }
+            if (current.type != "UMTS")
+            {
+                parent.removeView(holder.umts_rscp_ItemView)
+            }
+
         }
         catch (a: TypeCastException)
         {

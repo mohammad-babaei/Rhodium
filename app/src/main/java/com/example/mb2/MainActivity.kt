@@ -163,7 +163,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this@MainActivity, "No Signal", Toast.LENGTH_SHORT).show()
         }
         finally {
-            getLastLocation()
+            requestNewLocationData()
             if (current_location != null)
             {
                 val info = CellInfo(mcc = mcc, mnc = mnc, tac = tac, lac = lac, type = typee, gsm_rssi = gsm_rssi, umts_rscp = umts_rscp, lte_rsrq = lte_rsrq, lte_rsrp = lte_rsrp, lte_cqi = lte_cqi, strength = strength, longitude = current_location!!.longitude, altitude = current_location!!.latitude, time = System.currentTimeMillis())
@@ -171,26 +171,6 @@ class MainActivity : AppCompatActivity() {
 //                val mss = "$strength $typee \n latitude: ${current_location?.latitude.toString()}, longitude: ${current_location?.longitude.toString()}"
 //                Toast.makeText(this@MainActivity, mss, Toast.LENGTH_SHORT).show()
             }
-        }
-
-    }
-
-
-    private fun getLastLocation() {
-        if (isLocationEnabled()) {
-            mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-                var location: Location? = task.result
-                if (location == null) {
-                    requestNewLocationData()
-                } else {
-//                    Toast.makeText(this@MainActivity, "latitude: ${location.latitude.toString()}, longitude: ${location.longitude.toString()}", Toast.LENGTH_SHORT).show()
-                    current_location = location
-                }
-            }
-        } else {
-            Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show()
-            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-            startActivity(intent)
         }
 
     }
