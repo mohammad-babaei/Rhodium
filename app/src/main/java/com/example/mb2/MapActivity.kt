@@ -42,28 +42,47 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(iranPosition))
     }
 
-    private fun getMarkerColor(rsrp: Int, rsrq: Int) : Float {
+    private fun getMarkerColor(cellInfo: CellInfo) : Float {
         var color: Float
-        if (rsrq > -5 && rsrp > -84) {
-            color = 0F
-        } else if (rsrq > -9 && rsrp > -102) {
-            color = 120F
-        } else if (rsrq > -12 && rsrp > -111) {
-            color = 60F
-        } else if (rsrq < -12 && rsrp < -111) {
-            color = 240F
-        } else {
-            color = 359F
+        val type = cellInfo.type
+        when(type) {
+            "LTE" -> {
+                if (cellInfo.lte_rsrq.toInt() > -5 && cellInfo.lte_rsrp.toInt() > -84) color = 0F
+                else if (cellInfo.lte_rsrq.toInt() > -9 && cellInfo.lte_rsrp.toInt() > -102) color = 120F
+                else if (cellInfo.lte_rsrq.toInt() > -12 && cellInfo.lte_rsrp.toInt() > -111) color = 60F
+                else if (cellInfo.lte_rsrq.toInt() < -12 && cellInfo.lte_rsrp.toInt() < -111) color = 240F
+                else color = 359F
+
+            }
+            "UMTS" -> {
+                if (cellInfo.strength.toInt() >= -70) color = 0f
+                else if (cellInfo.strength.toInt() >= -85) color = 0f
+                else if (cellInfo.strength.toInt() >= -100) color = 0f
+                else if (cellInfo.strength.toInt() >= -110) color = 0f
+                else color = 0f
+            }
+            "GSM" -> {
+                if (cellInfo.strength.toInt() >= -70) color = 0f
+                else if (cellInfo.strength.toInt() >= -85) color = 0f
+                else if (cellInfo.strength.toInt() >= -100) color = 0f
+                else if (cellInfo.strength.toInt() >= -110) color = 0f
+                else color = 0f
+            }
+            else -> color = 0f
         }
+
         Log.i("MapActivity", color.toString());
+        Log.i("MapActivity", cellInfo.longitude.toString()+ " " + cellInfo.altitude.toString())
         return color
     }
 
     private fun updateMarkers(infos: List<CellInfo>) {
         for (cellInfo in infos) {
-            val pos = LatLng(cellInfo.altitude + infos.indexOf(cellInfo) * 0.1, cellInfo.longitude + infos.indexOf(cellInfo) * 0.1)
-            val color = getMarkerColor(cellInfo.lte_rsrp.toInt(), cellInfo.lte_rsrq.toInt())
-            mMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.defaultMarker(color)).position(pos))
+            val pos = LatLng(cellInfo.altitude, cellInfo.longitude)
+            val color = getMarkerColor(cellInfo)
+            mMap.addMarker(MarkerOptions().icon(
+                BitmapDescriptorFactory.defaultMarker(color)).position(
+                pos).title(cellInfo.type).snippet("strength: " + cellInfo.strength))
         }
     }
 }
