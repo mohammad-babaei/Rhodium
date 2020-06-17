@@ -25,6 +25,7 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import android.provider.Settings
+import android.view.View
 
 
 class MainActivity : AppCompatActivity() {
@@ -208,7 +209,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
+    fun showMap(view: View) {
+        println("map button pressed")
+        val intent = Intent(this, MapActivity::class.java)
+        startActivity(intent)
+    }
 //    fun getNetworkGeneration(context: Context): String? {
 //        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 //        return when (telephonyManager.networkType) {
