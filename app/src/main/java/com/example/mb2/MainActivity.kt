@@ -106,9 +106,6 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val cellInfo = tm.allCellInfo[0]
-
-            val networkOperator = tm.networkOperator
-
             if (cellInfo is CellInfoGsm)
             {
                 val cellSignalStrengthGsm: CellSignalStrengthGsm = cellInfo.cellSignalStrength
@@ -168,9 +165,7 @@ class MainActivity : AppCompatActivity() {
             if (current_location != null)
             {
                 val info = CellInfo(mcc = mcc, mnc = mnc, tac = tac, lac = lac, type = typee, gsm_rssi = gsm_rssi, umts_rscp = umts_rscp, lte_rsrq = lte_rsrq, lte_rsrp = lte_rsrp, lte_cqi = lte_cqi, strength = strength, longitude = current_location!!.longitude, altitude = current_location!!.latitude, time = System.currentTimeMillis())
-                val a = infoViewModel.insert(info)
-//                val mss = "$strength $typee \n latitude: ${current_location?.latitude.toString()}, longitude: ${current_location?.longitude.toString()}"
-//                Toast.makeText(this@MainActivity, mss, Toast.LENGTH_SHORT).show()
+                infoViewModel.insert(info)
             }
         }
 
@@ -200,7 +195,6 @@ class MainActivity : AppCompatActivity() {
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             var mLastLocation: Location = locationResult.lastLocation
-//            Toast.makeText(this@MainActivity, "latitude: ${mLastLocation.latitude.toString()}, longitude: ${mLastLocation.longitude.toString()}", Toast.LENGTH_SHORT).show()
             current_location = mLastLocation
         }
     }
@@ -210,35 +204,5 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, MapActivity::class.java)
         startActivity(intent)
     }
-//    fun getNetworkGeneration(context: Context): String? {
-//        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-//        return when (telephonyManager.networkType) {
-//            TelephonyManager.NETWORK_TYPE_UNKNOWN -> null
-//
-//            TelephonyManager.NETWORK_TYPE_GPRS,
-//            TelephonyManager.NETWORK_TYPE_EDGE,
-//            TelephonyManager.NETWORK_TYPE_CDMA,
-//            TelephonyManager.NETWORK_TYPE_1xRTT,
-//            TelephonyManager.NETWORK_TYPE_IDEN,
-//            TelephonyManager.NETWORK_TYPE_GSM -> "2G"
-//
-//            TelephonyManager.NETWORK_TYPE_UMTS,
-//            TelephonyManager.NETWORK_TYPE_EVDO_0,
-//            TelephonyManager.NETWORK_TYPE_EVDO_A,
-//            TelephonyManager.NETWORK_TYPE_HSDPA,
-//            TelephonyManager.NETWORK_TYPE_HSUPA,
-//            TelephonyManager.NETWORK_TYPE_HSPA,
-//            TelephonyManager.NETWORK_TYPE_EVDO_B,
-//            TelephonyManager.NETWORK_TYPE_EHRPD,
-//            TelephonyManager.NETWORK_TYPE_HSPAP,
-//            TelephonyManager.NETWORK_TYPE_TD_SCDMA -> "3G"
-//
-//            TelephonyManager.NETWORK_TYPE_LTE,
-//            TelephonyManager.NETWORK_TYPE_IWLAN -> "4G"
-//
-//            TelephonyManager.NETWORK_TYPE_NR -> "5G"
-//
-//            else -> null
-//        }
-//    }
+
 }
