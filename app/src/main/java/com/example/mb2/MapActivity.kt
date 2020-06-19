@@ -27,16 +27,19 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+
         infoViewModel = ViewModelProvider(this).get(CellInfoViewModel::class.java)
         infoViewModel.allInfos.observe(this, Observer { words ->
             // Update the list of markers
             words?.let { updateMarkers(it) }
         })
 
+
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setMyLocationEnabled(true)
     }
 
     private fun getMarkerColor(cellInfo: CellInfo) : Float {
@@ -74,7 +77,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         for (cellInfo in infos) {
             val pos = LatLng(cellInfo.altitude, cellInfo.longitude)
             val color = getMarkerColor(cellInfo)
-            val snip = "Strength: " + cellInfo.strength + "\n" +
+            val snip = "Strength: " + cellInfo.strength + ", " +
                        "PLMN: " + cellInfo.mcc + cellInfo.mnc
             val marker = mMap.addMarker(MarkerOptions().icon(
                 BitmapDescriptorFactory.defaultMarker(color)).position(
