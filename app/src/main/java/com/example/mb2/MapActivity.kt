@@ -37,9 +37,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val iranPosition = LatLng(32.364811, 53.799715)
-        mMap.addMarker(MarkerOptions().position(iranPosition).title("IRAN!"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(iranPosition))
     }
 
     private fun getMarkerColor(cellInfo: CellInfo) : Float {
@@ -47,32 +44,29 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val type = cellInfo.type
         when(type) {
             "LTE" -> {
-                if (cellInfo.lte_rsrq.toInt() > -5 && cellInfo.lte_rsrp.toInt() > -84) color = 0F
-                else if (cellInfo.lte_rsrq.toInt() > -9 && cellInfo.lte_rsrp.toInt() > -102) color = 120F
-                else if (cellInfo.lte_rsrq.toInt() > -12 && cellInfo.lte_rsrp.toInt() > -111) color = 60F
-                else if (cellInfo.lte_rsrq.toInt() < -12 && cellInfo.lte_rsrp.toInt() < -111) color = 240F
-                else color = 359F
+                if (cellInfo.strength.toInt() >= -80) color = BitmapDescriptorFactory.HUE_BLUE
+                else if (cellInfo.strength.toInt() >= -90) color = BitmapDescriptorFactory.HUE_GREEN
+                else if (cellInfo.strength.toInt() >= -100) color = BitmapDescriptorFactory.HUE_YELLOW
+                else if (cellInfo.strength.toInt() >= -110) color = BitmapDescriptorFactory.HUE_ORANGE
+                else color = BitmapDescriptorFactory.HUE_RED
 
             }
             "UMTS" -> {
-                if (cellInfo.strength.toInt() >= -70) color = 0f
-                else if (cellInfo.strength.toInt() >= -85) color = 0f
-                else if (cellInfo.strength.toInt() >= -100) color = 0f
-                else if (cellInfo.strength.toInt() >= -110) color = 0f
-                else color = 0f
+                if (cellInfo.strength.toInt() >= -70) color = BitmapDescriptorFactory.HUE_BLUE
+                else if (cellInfo.strength.toInt() >= -85) color = BitmapDescriptorFactory.HUE_GREEN
+                else if (cellInfo.strength.toInt() >= -100) color = BitmapDescriptorFactory.HUE_YELLOW
+                else if (cellInfo.strength.toInt() >= -110) color = BitmapDescriptorFactory.HUE_ORANGE
+                else color = BitmapDescriptorFactory.HUE_RED
             }
             "GSM" -> {
-                if (cellInfo.strength.toInt() >= -70) color = 0f
-                else if (cellInfo.strength.toInt() >= -85) color = 0f
-                else if (cellInfo.strength.toInt() >= -100) color = 0f
-                else if (cellInfo.strength.toInt() >= -110) color = 0f
-                else color = 0f
+                if (cellInfo.strength.toInt() >= -70) color = BitmapDescriptorFactory.HUE_BLUE
+                else if (cellInfo.strength.toInt() >= -85) color = BitmapDescriptorFactory.HUE_GREEN
+                else if (cellInfo.strength.toInt() >= -100) color = BitmapDescriptorFactory.HUE_YELLOW
+                else if (cellInfo.strength.toInt() >= -110) color = BitmapDescriptorFactory.HUE_ORANGE
+                else color = BitmapDescriptorFactory.HUE_RED
             }
-            else -> color = 0f
+            else -> color = BitmapDescriptorFactory.HUE_RED
         }
-
-        Log.i("MapActivity", color.toString());
-        Log.i("MapActivity", cellInfo.longitude.toString()+ " " + cellInfo.altitude.toString())
         return color
     }
 
@@ -80,9 +74,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         for (cellInfo in infos) {
             val pos = LatLng(cellInfo.altitude, cellInfo.longitude)
             val color = getMarkerColor(cellInfo)
-            mMap.addMarker(MarkerOptions().icon(
+            val snip = "Strength: " + cellInfo.strength + "\n" +
+                       "PLMN: " + cellInfo.mcc + cellInfo.mnc
+            val marker = mMap.addMarker(MarkerOptions().icon(
                 BitmapDescriptorFactory.defaultMarker(color)).position(
-                pos).title(cellInfo.type).snippet("strength: " + cellInfo.strength))
+                pos).title(cellInfo.type).snippet(snip))
         }
     }
 }
