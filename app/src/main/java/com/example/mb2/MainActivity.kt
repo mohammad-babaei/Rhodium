@@ -6,13 +6,18 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.telephony.*
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -24,13 +29,18 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import android.provider.Settings
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var infoViewModel: CellInfoViewModel
     private var current_location: Location? = null
     lateinit var mFusedLocationClient: FusedLocationProviderClient
+    var latency : Long = 0
+    var content_latency :Long = 0
+    var jitter = 0
+    var jitter_counter = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +67,8 @@ class MainActivity : AppCompatActivity() {
             Dexter.withContext(this)
                 .withPermissions(
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.READ_PHONE_STATE
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.ACCESS_NETWORK_STATE
                 ).withListener(object : MultiplePermissionsListener {
                     override fun onPermissionsChecked(report: MultiplePermissionsReport) {
 
@@ -82,6 +93,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("MissingPermission")
     fun minusOneSecond(tm: TelephonyManager){
 
@@ -95,6 +107,8 @@ class MainActivity : AppCompatActivity() {
         var mnc: String = ""
         var lac: String = ""
         var tac: String = ""
+        var upSpeed: Int = 0
+        var downSpeed: Int = 0
 
 
         var typee: String = ""
@@ -105,11 +119,7 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val cellInfo = tm.allCellInfo[0]
-
-            val networkOperator = tm.networkOperator
-
-            if (cellInfo is CellInfoGsm)
-            {
+            if (cellInfo is CellInfoGsm) {
                 val cellSignalStrengthGsm: CellSignalStrengthGsm = cellInfo.cellSignalStrength
                 val cellIdentityGsm: CellIdentityGsm = cellInfo.cellIdentity
                 mcc = cellIdentityGsm.mcc.toString()
@@ -120,8 +130,7 @@ class MainActivity : AppCompatActivity() {
                 typee = "GSM"
 
             }
-            if (cellInfo is CellInfoWcdma)
-            {
+            if (cellInfo is CellInfoWcdma) {
                 val cellSignalStrengthWcdma: CellSignalStrengthWcdma = cellInfo.cellSignalStrength
                 val cellIdentityWcdma: CellIdentityWcdma = cellInfo.cellIdentity
                 strength = cellSignalStrengthWcdma.dbm.toString()
@@ -132,8 +141,7 @@ class MainActivity : AppCompatActivity() {
                 typee = "UMTS"
 
             }
-            if (cellInfo is CellInfoLte)
-            {
+            if (cellInfo is CellInfoLte) {
                 val cellSignalStrengthLte: CellSignalStrengthLte = cellInfo.cellSignalStrength
                 val cellIdentityLte: CellIdentityLte = cellInfo.cellIdentity
                 mcc = cellIdentityLte.mcc.toString()
@@ -150,14 +158,29 @@ class MainActivity : AppCompatActivity() {
                 typee = "LTE"
 
             }
-            if (cellInfo is CellInfoCdma)
-            {
+            if (cellInfo is CellInfoCdma) {
                 val cellSignalStrengthCdma: CellSignalStrengthCdma = cellInfo.cellSignalStrength
                 strength = cellSignalStrengthCdma.dbm.toString()
                 umts_rscp = cellSignalStrengthCdma.asuLevel.toString()
                 typee = "UMTS"
 
             }
+
+            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+            var netInfo: NetworkInfo? = cm.activeNetworkInfo
+
+            if (netInfo != null && netInfo.isConnected) {
+                val nc: NetworkCapabilities = cm.getNetworkCapabilities(cm.activeNetwork)
+                if (nc != null){
+                    downSpeed = nc.getLinkDownstreamBandwidthKbps()
+                    upSpeed = nc.getLinkUpstreamBandwidthKbps()
+                }
+
+            }
+
+            latency = latencycal("8.8.8.8")
+            content_latency = contlatencycal("https://www.aparat.com/")
         }
         catch (e: IndexOutOfBoundsException) {
             Toast.makeText(this@MainActivity, "No Signal", Toast.LENGTH_SHORT).show()
@@ -166,12 +189,16 @@ class MainActivity : AppCompatActivity() {
             requestNewLocationData()
             if (current_location != null)
             {
-                val info = CellInfo(mcc = mcc, mnc = mnc, tac = tac, lac = lac, type = typee, gsm_rssi = gsm_rssi, umts_rscp = umts_rscp, lte_rsrq = lte_rsrq, lte_rsrp = lte_rsrp, lte_cqi = lte_cqi, strength = strength, longitude = current_location!!.longitude, altitude = current_location!!.latitude, time = System.currentTimeMillis())
-                val a = infoViewModel.insert(info)
-//                val mss = "$strength $typee \n latitude: ${current_location?.latitude.toString()}, longitude: ${current_location?.longitude.toString()}"
-//                Toast.makeText(this@MainActivity, mss, Toast.LENGTH_SHORT).show()
+                val info = CellInfo(jitter = jitter, latency = latency, content_latency = content_latency, upSpeed = upSpeed, downSpeed = downSpeed, mcc = mcc, mnc = mnc, tac = tac, lac = lac, type = typee, gsm_rssi = gsm_rssi, umts_rscp = umts_rscp, lte_rsrq = lte_rsrq, lte_rsrp = lte_rsrp, lte_cqi = lte_cqi, strength = strength, longitude = current_location!!.longitude, altitude = current_location!!.latitude, time = System.currentTimeMillis())
+                infoViewModel.insert(info)
             }
         }
+
+
+
+
+
+
 
     }
     private fun isLocationEnabled(): Boolean {
@@ -199,41 +226,73 @@ class MainActivity : AppCompatActivity() {
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             var mLastLocation: Location = locationResult.lastLocation
-//            Toast.makeText(this@MainActivity, "latitude: ${mLastLocation.latitude.toString()}, longitude: ${mLastLocation.longitude.toString()}", Toast.LENGTH_SHORT).show()
             current_location = mLastLocation
         }
     }
 
+    fun showMap(view: View) {
+        println("map button pressed")
+        val intent = Intent(this, MapActivity::class.java)
+        startActivity(intent)
+    }
 
-//    fun getNetworkGeneration(context: Context): String? {
-//        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-//        return when (telephonyManager.networkType) {
-//            TelephonyManager.NETWORK_TYPE_UNKNOWN -> null
-//
-//            TelephonyManager.NETWORK_TYPE_GPRS,
-//            TelephonyManager.NETWORK_TYPE_EDGE,
-//            TelephonyManager.NETWORK_TYPE_CDMA,
-//            TelephonyManager.NETWORK_TYPE_1xRTT,
-//            TelephonyManager.NETWORK_TYPE_IDEN,
-//            TelephonyManager.NETWORK_TYPE_GSM -> "2G"
-//
-//            TelephonyManager.NETWORK_TYPE_UMTS,
-//            TelephonyManager.NETWORK_TYPE_EVDO_0,
-//            TelephonyManager.NETWORK_TYPE_EVDO_A,
-//            TelephonyManager.NETWORK_TYPE_HSDPA,
-//            TelephonyManager.NETWORK_TYPE_HSUPA,
-//            TelephonyManager.NETWORK_TYPE_HSPA,
-//            TelephonyManager.NETWORK_TYPE_EVDO_B,
-//            TelephonyManager.NETWORK_TYPE_EHRPD,
-//            TelephonyManager.NETWORK_TYPE_HSPAP,
-//            TelephonyManager.NETWORK_TYPE_TD_SCDMA -> "3G"
-//
-//            TelephonyManager.NETWORK_TYPE_LTE,
-//            TelephonyManager.NETWORK_TYPE_IWLAN -> "4G"
-//
-//            TelephonyManager.NETWORK_TYPE_NR -> "5G"
-//
-//            else -> null
-//        }
-//    }
+    private fun latencycal(addr: String) :Long {
+        val runtime = Runtime.getRuntime()
+        var pingg : Long =999999999
+        try {
+            var a : Long = (System.currentTimeMillis() %100000)
+            val IpProcess = runtime.exec("/system/bin/ping -c 1 "+addr)
+            val mExitValue  = IpProcess.waitFor(2, TimeUnit.SECONDS)
+            if (mExitValue ){
+                var b : Long = (System.currentTimeMillis() %100000)
+                if(b<=a){
+                    pingg = (100000 - a) + b
+                }else{
+                    pingg = b - a
+                }
+            }else{
+                pingg = 999999999
+            }
+            if (jitter_counter != 0 && pingg != 999999999.toLong() && latency != 999999999.toLong()){
+                var pingg2 = pingg.toInt()
+                var pingg3 = kotlin.math.abs((pingg2 - latency).toInt())
+                jitter = (((jitter_counter-1)*jitter)+(pingg3)) / jitter_counter
+                jitter_counter++
+            }else if (jitter_counter == 0){
+                jitter_counter++
+            }
+//            latency = pingg
+        } catch (ignore: InterruptedException) {
+            ignore.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return pingg
+    }
+    private fun contlatencycal(addr: String) :Long {
+        val runtime = Runtime.getRuntime()
+        var pingg : Long =999999999
+        try {
+            var a : Long = (System.currentTimeMillis() %100000)
+            val IpProcess = runtime.exec("/system/bin/ping -c 1 "+addr)
+            val mExitValue  = IpProcess.waitFor(2,TimeUnit.SECONDS)
+            if (mExitValue ){
+                var b : Long = (System.currentTimeMillis() %100000)
+                if(b<=a){
+                    pingg = (100000 - a) + b
+                }else{
+                    pingg = b - a
+                }
+            }else{
+                pingg = 999999999
+            }
+        } catch (ignore: InterruptedException) {
+            ignore.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return pingg
+    }
+
+
 }

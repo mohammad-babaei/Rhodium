@@ -31,6 +31,11 @@ class InfoListAdapter internal constructor(
         val tac_ItemView: TextView = itemView.findViewById(R.id.tac)
         val mnc_ItemView: TextView = itemView.findViewById(R.id.mnc)
         val mcc_ItemView: TextView = itemView.findViewById(R.id.mcc)
+        val latency_ItemView: TextView = itemView.findViewById(R.id.latency)
+        val content_latency_ItemView: TextView = itemView.findViewById(R.id.content_latency)
+        val jitter_ItemView: TextView = itemView.findViewById(R.id.jitter)
+
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WordViewHolder {
@@ -56,6 +61,10 @@ class InfoListAdapter internal constructor(
         holder.tac_ItemView.text = "Tac: ${current.tac}"
         holder.mnc_ItemView.text = "Mnc: ${current.mnc}"
         holder.mcc_ItemView.text = "Mcc: ${current.mcc}"
+        holder.latency_ItemView.text = "Latency: ${current.latency}"
+        holder.content_latency_ItemView.text = "Content Latency: ${current.content_latency}"
+        holder.jitter_ItemView.text = "Jitter: ${current.jitter}"
+
 
         try {
             val parent: ViewGroup = holder.gsm_rssi_ItemView.parent as ViewGroup

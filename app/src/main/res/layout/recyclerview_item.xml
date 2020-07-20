@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="false"
@@ -136,4 +137,32 @@
         android:fontFamily="sans-serif-medium"
         android:text="@string/tac"
         android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/latency"
+        style="@style/word_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="Latency: "
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/content_latency"
+        style="@style/word_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="Content Latency: "
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/jitter"
+        style="@style/word_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="Content Latency: "
+        android:textSize="16sp"
+        tools:text="Jitter: " />
 </LinearLayout>
