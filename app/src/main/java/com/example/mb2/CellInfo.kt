@@ -18,6 +18,11 @@ class CellInfo(@PrimaryKey(autoGenerate = true) val id: Int? = null,
                val tac: String,
                val longitude: Double,
                val altitude: Double,
-               val time: Long
+               val time: Long,
+               val upSpeed: Int,
+               val downSpeed: Int,
+               val latency: Long,
+               val content_latency: Long,
+               val jitter: Int
 
 )
