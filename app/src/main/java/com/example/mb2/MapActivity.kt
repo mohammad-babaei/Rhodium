@@ -1,8 +1,14 @@
 package com.example.mb2
 
+import android.graphics.Color
+import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 
@@ -12,6 +18,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import java.util.*
 
@@ -40,6 +47,27 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMyLocationEnabled(true)
+        mMap?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
+            override fun getInfoWindow(arg0: Marker): View? {
+                return null
+            }
+
+            override fun getInfoContents(marker: Marker): View {
+                val info = LinearLayout(applicationContext)
+                info.orientation = LinearLayout.VERTICAL
+                val title = TextView(applicationContext)
+                title.setTextColor(Color.BLACK)
+                title.gravity = Gravity.CENTER
+                title.setTypeface(null, Typeface.BOLD)
+                title.text = marker.title
+                val snippet = TextView(applicationContext)
+                snippet.setTextColor(Color.GRAY)
+                snippet.text = marker.snippet
+                info.addView(title)
+                info.addView(snippet)
+                return info
+            }
+        })
     }
 
     private fun getMarkerColor(cellInfo: CellInfo) : Float {
@@ -77,8 +105,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         for (cellInfo in infos) {
             val pos = LatLng(cellInfo.altitude, cellInfo.longitude)
             val color = getMarkerColor(cellInfo)
-            val snip = "Strength: " + cellInfo.strength + ", " +
-                       "PLMN: " + cellInfo.mcc + cellInfo.mnc
+
+            val snip = "Strength: " + cellInfo.strength + "\n" +
+                    "PLMN: " + cellInfo.mcc + cellInfo.mnc + "\n" +
+                    "up speed: " + cellInfo.upSpeed + " kb\n" +
+                    "down speed: " + cellInfo.downSpeed + " kb\n" +
+                    "latency: " + cellInfo.latency + " ms\n" +
+                    "content latency: " + cellInfo.content_latency + " ms\n" +
+                    "jitter: " + cellInfo.jitter
+
             val marker = mMap.addMarker(MarkerOptions().icon(
                 BitmapDescriptorFactory.defaultMarker(color)).position(
                 pos).title(cellInfo.type).snippet(snip))
